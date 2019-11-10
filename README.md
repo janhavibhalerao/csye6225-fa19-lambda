@@ -1,4 +1,3 @@
-GitHub Repository for Lambda Functions
 # CSYE 6225 - Fall 2019
 
 ## Team Information
