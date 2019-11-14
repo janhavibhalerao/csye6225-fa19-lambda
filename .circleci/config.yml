@@ -1,0 +1,42 @@
+version: 2
+jobs:
+    build:
+        docker:
+          - image: circleci/node:7.10
+        working_directory: ~/repo/myLambda
+
+        steps:
+            - checkout
+             # Download and cache dependencies
+            - restore_cache:
+                keys:
+                  - v1-dependencies-{{ checksum "package.json" }}
+                  # fallback to using the latest cache if no exact match is found
+                  - v1-dependencies-
+
+            - run: npm install
+
+            - save_cache:
+                paths:
+                  - node_modules
+                key: v1-dependencies-{{ checksum "package.json" }}
+            - run:
+                name: Install packages
+                command: sudo apt-get install wget zip unzip && sudo apt-get install python-dev && sudo apt-get install python-pip -y
+            - run:
+                name: Install awscli
+                command: |
+                  sudo pip install awscli
+                  aws configure set default.region us-east-1
+                  aws configure set aws_access_key_id ${AWS_ACCESS_KEY}
+                  aws configure set aws_secret_access_key ${AWS_SECRET_KEY}
+            - run:
+                name: Zip Lambda folder
+                command: zip -r lambdasendmail-${CIRCLE_BUILD_NUM}.zip index.js package.json
+            - run:
+                name: Upload Lambda to S3 & update function code from S3
+                command: | 
+                  pwd
+                  ls -al
+                  aws s3 cp lambdasendmail-${CIRCLE_BUILD_NUM}.zip s3://${LAMBDA_S3_BUCKET} --sse
+                  aws lambda update-function-code --function-name sendEmail --s3-bucket ${LAMBDA_S3_BUCKET} --s3-key lambdasendmail-${CIRCLE_BUILD_NUM}.zip
