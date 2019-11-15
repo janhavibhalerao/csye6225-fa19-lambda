@@ -22,7 +22,7 @@ exports.handler = (event, context) => {
                 Item: {
                     id: { S: email },
                     token: { S: context.awsRequestId },
-                    ttl: { N: (Math.floor(Date.now() / 1000) + 900).toString() }
+                    ttl: { N: (Math.floor(Date.now() / 1000) + 1800).toString() }
                 }
             };
 
