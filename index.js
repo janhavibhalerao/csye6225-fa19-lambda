@@ -19,7 +19,7 @@ exports.handler = (event, context) => {
             'id': { S: email }
         }
     };
-    
+
     dynamoDB.getItem(getItemObject, (err, data) => {
         if (data.Item === undefined || data.Item.ttl.N < Math.floor(Date.now() / 1000)) {
             const putItemObject = {
@@ -31,16 +31,17 @@ exports.handler = (event, context) => {
                 }
             };
 
-            dynamoDB.putItem(putItemObject, () => {});
+            dynamoDB.putItem(putItemObject, () => { });
 
             route53.listHostedZones({}, (err, data) => {
 
                 let domainName = data.HostedZones[0].Name;
                 domainName = domainName.substring(0, domainName.length - 1);
 
-                details.forEach(element => recipeList.push("http://" + domainName + "/v1/recipe/" + element.recipeid));
-                console.log('Recipe Links:', recipeList);
-                
+                details.forEach(element => recipeList.push(" \n http://" + domainName + "/v1/recipe/" + element.recipeid + "\n"));
+                let arr = recipeList.toString();
+                console.log('Recipe Links:', arr);
+
                 const emailObject = {
                     Destination: {
                         ToAddresses: [email]
@@ -48,7 +49,7 @@ exports.handler = (event, context) => {
                     Message: {
                         Body: {
                             Text: {
-                                Data: recipeList
+                                Data: "Click below links to view recipes: \n " + arr
                             }
                         },
                         Subject: {
@@ -57,8 +58,14 @@ exports.handler = (event, context) => {
                     },
                     Source: "noreply@" + domainName
                 };
-                ses.sendEmail(emailObject, () => {})
+                ses.sendEmail(emailObject, () => {
+                    if (err) {
+                        console.log(err.message);
+                    } else {
+                        console.log("Email sent! Message ID: ", data.MessageId);
+                    }
+                });
             });
         }
-    })
+    });
 };
