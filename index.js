@@ -2,12 +2,20 @@ const AWS = require('aws-sdk');
 const ses = new AWS.SES();
 const dynamoDB = new AWS.DynamoDB();
 const route53 = new AWS.Route53();
+const log4js = require('log4js');
+log4js.configure({
+    appenders: { logs: { type: 'file', filename: '/home/centos/webapp/logs/webapp.log' } },
+    categories: { default: { appenders: ['logs'], level: 'info' } }
+});
+const logger = log4js.getLogger('logs');
+
 AWS.config.update({ region: 'us-east-1' });
 
 exports.handler = (event, context) => {
     const email = event.Records[0].Sns.Message.email;
     const recipeID = event.Records[0].Sns.Message.recipeIds;
-
+    logger.info(email);
+    logger.info(recipeID);
     const getItemObject = {
         TableName: 'csye6225',
         Key: {
@@ -16,6 +24,7 @@ exports.handler = (event, context) => {
     };
     
     dynamoDB.getItem(getItemObject, (err, data) => {
+        logger.info(data);
         if (data === null || data.Item === undefined || data.Item.ttl.N < Math.floor(Date.now() / 1000)) {
             const putItemObject = {
                 TableName: 'csye6225',
