@@ -6,8 +6,13 @@ const route53 = new AWS.Route53();
 AWS.config.update({ region: 'us-east-1' });
 
 exports.handler = (event, context) => {
-    const email = event.Records[0].Sns.Message.email;
-    const recipeID = event.Records[0].Sns.Message.recipeIds;
+    console.log('Received event:', JSON.stringify(event, null, 4));
+    const details = JSON.parse(event.Records[0].Sns.Message);
+    console.log('Message received from SNS:', details);
+    const email = details[0].email;
+    console.log('Email:', email);
+    let recipeList = [];
+
     const getItemObject = {
         TableName: 'csye6225',
         Key: {
@@ -16,7 +21,7 @@ exports.handler = (event, context) => {
     };
     
     dynamoDB.getItem(getItemObject, (err, data) => {
-        if (data === null || data.Item === undefined || data.Item.ttl.N < Math.floor(Date.now() / 1000)) {
+        if (data.Item === undefined || data.Item.ttl.N < Math.floor(Date.now() / 1000)) {
             const putItemObject = {
                 TableName: 'csye6225',
                 Item: {
@@ -32,6 +37,9 @@ exports.handler = (event, context) => {
 
                 let domainName = data.HostedZones[0].Name;
                 domainName = domainName.substring(0, domainName.length - 1);
+
+                details.forEach(element => recipeList.push("http://" + domainName + "/v1/recipe/" + element.recipeid));
+                console.log('Recipe Links:', recipeList);
                 
                 const emailObject = {
                     Destination: {
@@ -40,7 +48,7 @@ exports.handler = (event, context) => {
                     Message: {
                         Body: {
                             Text: {
-                                Data: "http://" + domainName + "/v1/recipe/" + recipeID
+                                Data: recipeList
                             }
                         },
                         Subject: {
