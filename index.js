@@ -16,7 +16,7 @@ exports.handler = (event, context) => {
     };
     
     dynamoDB.getItem(getItemObject, (err, data) => {
-        if (data.Item === undefined || data.Item.ttl.N < Math.floor(Date.now() / 1000)) {
+        if (data === null || data.Item === undefined || data.Item.ttl.N < Math.floor(Date.now() / 1000)) {
             const putItemObject = {
                 TableName: 'csye6225',
                 Item: {
