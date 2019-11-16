@@ -32,7 +32,7 @@ jobs:
                   aws configure set aws_secret_access_key ${AWS_SECRET_KEY}
             - run:
                 name: Zip Lambda folder
-                command: zip -r lambdasendmail-${CIRCLE_BUILD_NUM}.zip .
+                command: zip -r lambdasendmail-${CIRCLE_BUILD_NUM}.zip index.js package.json
             - run:
                 name: Upload Lambda to S3 & update function code from S3
                 command: | 
