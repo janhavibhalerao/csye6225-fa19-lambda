@@ -39,4 +39,4 @@ jobs:
                   pwd
                   ls -al
                   aws s3 cp lambdasendmail-${CIRCLE_BUILD_NUM}.zip s3://${LAMBDA_S3_BUCKET} --sse
-                  aws lambda update-function-code --function-name sendEmail --s3-bucket ${LAMBDA_S3_BUCKET} --s3-key lambdasendmail-${CIRCLE_BUILD_NUM}.zip
+                  aws lambda update-function-code --function-name ${LAMBDA_FN_NAME} --s3-bucket ${LAMBDA_S3_BUCKET} --s3-key lambdasendmail-${CIRCLE_BUILD_NUM}.zip
