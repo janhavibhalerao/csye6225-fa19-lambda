@@ -8,9 +8,9 @@ AWS.config.update({ region: 'us-east-1' });
 exports.handler = (event, context) => {
     console.log('Received event:', JSON.stringify(event, null, 4));
     const details = JSON.parse(event.Records[0].Sns.Message);
-    console.log('Message received from SNS:', details);
+    //console.log('Message received from SNS:', details);
     const email = details[0].email;
-    console.log('Email:', email);
+    //console.log('Email:', email);
     let recipeList = [];
 
     const getItemObject = {
@@ -58,7 +58,7 @@ exports.handler = (event, context) => {
                     },
                     Source: "noreply@" + domainName
                 };
-                ses.sendEmail(emailObject, () => {
+                ses.sendEmail(emailObject, (err, data) => {
                     if (err) {
                         console.log(err.message);
                     } else {
